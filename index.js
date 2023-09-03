@@ -24,7 +24,6 @@ dotenv.config();
 const dbConnect = async() => {
     try{
         const db = await mongoose.connect(process.env.DB_CONNECT_LOCAL, { useNewUrlParser: true });
-        console.log("db connected")
     }catch(err){
         console.log("db err", err)
     }

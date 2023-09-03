@@ -7,7 +7,6 @@ destination: function (req, files, callback) {
     cb(null, "public/customerdocuments");
     },
   filename: (req, files, callback) => {
-    console.log("inv sajjkdhsdhsj ", files)
     const match = ["image/png", "image/jpeg"];
 
     if (match.indexOf(files.mimetype) === -1) {

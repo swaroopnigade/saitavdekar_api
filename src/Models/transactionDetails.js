@@ -40,7 +40,19 @@ const transactionDetailsSchema = new mongoose.Schema({
         type : String, 
         required:true
     },
+    metalType:{
+        type:String,
+        required:true,
+    },
     product:{
+        type:String,
+        required:true,
+    },
+    productWeight:{
+        type:Number,
+        required:true,
+    },
+    weightUnit:{
         type:String,
         required:true,
     },
@@ -62,6 +74,10 @@ const transactionDetailsSchema = new mongoose.Schema({
     },
     idCardType:{
         type : Number, 
+        required:true
+    },
+    idCardName:{
+        type : String, 
         required:true
     },
     idCardNumber:{
