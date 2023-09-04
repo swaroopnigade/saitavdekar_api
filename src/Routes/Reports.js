@@ -10,11 +10,17 @@ router.get("/report", authenticateJWT, async (req, res) => {
     if (req.user) {
       const page = parseInt(req.query.page) || 1; //for next page pass 1 here
       const limit = parseInt(req.query.limit) || 10;
-      const getTransactionDetails = await Transactiondetails.find()
-        .limit(limit * 1)
-        .skip((page - 1) * limit)
-        .sort([["transactionDate", -1]])
-        .exec();
+      let getTransactionDetails = null;
+      if (req.query.page) {
+        getTransactionDetails = await Transactiondetails.find()
+          .limit(limit * 1)
+          .skip((page - 1) * limit)
+          .sort([["transactionDate", -1]])
+          .exec();
+      } else {
+        getTransactionDetails = await Transactiondetails.find();
+      }
+      
       const count = await Transactiondetails.count();
       const newData = {
         transactionData: getTransactionDetails,
@@ -80,22 +86,36 @@ router.get("/dailyReport", authenticateJWT, async (req, res) => {
       const startOfToday =
         now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
 
-      const getReqEditData = filter === "Report" ? await Transactiondetails.find({
-        transactionDate: { $gte: startOfToday },
-      }) : await Transactiondetails.find({
-        transactionDate: { $gte: startOfToday },
-        transactionStatus:filter
-      })
-        .limit(limit * 1)
-        .skip((page - 1) * limit)
-        .sort([["transactionDate", -1]])
-        .exec();
+      let getReqEditData = null;
+
+      if (req.query.page) {
+        getReqEditData = filter === "Report" ? await Transactiondetails.find({
+          transactionDate: { $gte: startOfToday },
+        }).limit(limit * 1)
+          .skip((page - 1) * limit)
+          .sort([["transactionDate", -1]])
+          .exec() : await Transactiondetails.find({
+            transactionDate: { $gte: startOfToday },
+            transactionStatus: filter
+          })
+            .limit(limit * 1)
+            .skip((page - 1) * limit)
+            .sort([["transactionDate", -1]])
+            .exec();
+      } else {
+        getReqEditData = filter === "Report" ? await Transactiondetails.find({
+          transactionDate: { $gte: startOfToday },
+        }) : await Transactiondetails.find({
+          transactionDate: { $gte: startOfToday },
+          transactionStatus: filter
+        })
+      }
 
       const count = filter === "Report " ? await Transactiondetails.find({
         transactionDate: { $gte: startOfToday },
       }) : await Transactiondetails.find({
         transactionDate: { $gte: startOfToday },
-        transactionStatus:filter
+        transactionStatus: filter
       }); //getReqEditData.length || 0;
       const newData = {
         transactionData: getReqEditData,
@@ -132,22 +152,42 @@ router.get("/weeklyReport", authenticateJWT, async (req, res) => {
         date_today.setDate(date_today.getDate() - date_today.getDay() + 6)
       );
 
-      const getReqEditData = filter === "Report" ? await Transactiondetails.find({
-        transactionDate: {
-          $gte: first_day_of_the_week,
-          $lte: last_day_of_the_week,
-        },
-      }) : await Transactiondetails.find({
-        transactionDate: {
-          $gte: first_day_of_the_week,
-          $lte: last_day_of_the_week,
-        },
-        transactionStatus:filter
-      })
-        .limit(limit * 1)
-        .skip((page - 1) * limit)
-        .sort([["transactionDate", -1]])
-        .exec();
+      let getReqEditData = null;
+      if (req.query.page) {
+        getReqEditData = filter === "Report" ? await Transactiondetails.find({
+          transactionDate: {
+            $gte: first_day_of_the_week,
+            $lte: last_day_of_the_week,
+          },
+        }).limit(limit * 1)
+          .skip((page - 1) * limit)
+          .sort([["transactionDate", -1]])
+          .exec() : await Transactiondetails.find({
+            transactionDate: {
+              $gte: first_day_of_the_week,
+              $lte: last_day_of_the_week,
+            },
+            transactionStatus: filter
+          })
+            .limit(limit * 1)
+            .skip((page - 1) * limit)
+            .sort([["transactionDate", -1]])
+            .exec();
+      } else {
+        getReqEditData = filter === "Report" ? await Transactiondetails.find({
+          transactionDate: {
+            $gte: first_day_of_the_week,
+            $lte: last_day_of_the_week,
+          },
+        }) : await Transactiondetails.find({
+          transactionDate: {
+            $gte: first_day_of_the_week,
+            $lte: last_day_of_the_week,
+          },
+          transactionStatus: filter
+        })
+      }
+
 
       const count = filter === "Report" ? await Transactiondetails.find({
         transactionDate: {
@@ -159,7 +199,7 @@ router.get("/weeklyReport", authenticateJWT, async (req, res) => {
           $gte: first_day_of_the_week,
           $lte: last_day_of_the_week,
         },
-        transactionStatus:filter
+        transactionStatus: filter
       }); //getReqEditData.length || 0;
       const newData = {
         transactionData: getReqEditData,
@@ -192,22 +232,44 @@ router.get("/monthlyReport", authenticateJWT, async (req, res) => {
       let firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
       let lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
-      const getReqEditData = filter === "Report" ? await Transactiondetails.find({
-        transactionDate: {
-          $gte: firstDay,
-          $lte: lastDay,
-        },
-      }) : await Transactiondetails.find({
-        transactionDate: {
-          $gte: firstDay,
-          $lte: lastDay,
-        },
-        transactionStatus:filter
-      })
-        .limit(limit * 1)
-        .skip((page - 1) * limit)
-        .sort([["transactionDate", -1]])
-        .exec();
+      let getReqEditData = null;
+
+      if (req.query.page) {
+        console.log('1111 ', req.query.page)
+        getReqEditData = filter === "Report" ? await Transactiondetails.find({
+          transactionDate: {
+            $gte: firstDay,
+            $lte: lastDay,
+          },
+        }).limit(limit * 1)
+          .skip((page - 1) * limit)
+          .sort([["transactionDate", -1]])
+          .exec() : await Transactiondetails.find({
+            transactionDate: {
+              $gte: firstDay,
+              $lte: lastDay,
+            },
+            transactionStatus: filter
+          })
+            .limit(limit * 1)
+            .skip((page - 1) * limit)
+            .sort([["transactionDate", -1]])
+            .exec();
+      } else {
+        console.log('22222 ', req.query.page)
+        getReqEditData = filter === "Report" ? await Transactiondetails.find({
+          transactionDate: {
+            $gte: firstDay,
+            $lte: lastDay,
+          },
+        }) : await Transactiondetails.find({
+          transactionDate: {
+            $gte: firstDay,
+            $lte: lastDay,
+          },
+          transactionStatus: filter
+        })
+      }
 
       const count = filter === "Report" ? await Transactiondetails.find({
         transactionDate: {
@@ -219,7 +281,7 @@ router.get("/monthlyReport", authenticateJWT, async (req, res) => {
           $gte: firstDay,
           $lte: lastDay,
         },
-        transactionStatus:filter
+        transactionStatus: filter
       }); //getReqEditData.length || 0;
       const newData = {
         transactionData: getReqEditData,
@@ -247,22 +309,43 @@ router.get("/customReport", authenticateJWT, async (req, res) => {
       const limit = parseInt(req.query.limit) || 10;
       const filter = req.query.filter;
 
-      const getReqEditData = filter === "Report" ? await Transactiondetails.find({
-        transactionDate: {
-          $gte: req.query.fromDate,
-          $lte: req.query.toDate,
-        },
-      }) : await Transactiondetails.find({
-        transactionDate: {
-          $gte: req.query.fromDate,
-          $lte: req.query.toDate,
-        },
-        transactionStatus:filter
-      })
-        .limit(limit * 1)
-        .skip((page - 1) * limit)
-        .sort([["transactionDate", -1]])
-        .exec();
+      let getReqEditData = null;
+
+      if (req.query.page) {
+        getReqEditData = filter === "Report" ? await Transactiondetails.find({
+          transactionDate: {
+            $gte: req.query.fromDate,
+            $lte: req.query.toDate,
+          },
+        }).limit(limit * 1)
+          .skip((page - 1) * limit)
+          .sort([["transactionDate", -1]])
+          .exec() : await Transactiondetails.find({
+            transactionDate: {
+              $gte: req.query.fromDate,
+              $lt: req.query.toDate,
+            },
+            transactionStatus: filter
+          })
+            .limit(limit * 1)
+            .skip((page - 1) * limit)
+            .sort([["transactionDate", -1]])
+            .exec();
+      } else {
+        getReqEditData = filter === "Report" ? await Transactiondetails.find({
+          transactionDate: {
+            $gte: req.query.fromDate,
+            $lte: req.query.toDate,
+          },
+        }) : await Transactiondetails.find({
+          transactionDate: {
+            $gte: req.query.fromDate,
+            $lte: req.query.toDate,
+          },
+          transactionStatus: filter
+        })
+      }
+
 
       const count = filter === "Report" ? await Transactiondetails.find({
         transactionDate: {
@@ -274,7 +357,7 @@ router.get("/customReport", authenticateJWT, async (req, res) => {
           $gte: req.query.fromDate,
           $lte: req.query.toDate,
         },
-        transactionStatus:filter
+        transactionStatus: filter
       }); //getReqEditData.length || 0;
       const newData = {
         transactionData: getReqEditData,
@@ -310,13 +393,13 @@ router.get("/nameList", authenticateJWT, async (req, res) => {
       // ).sort({ firstName: -1 });
 
       const searchData = await Transactiondetails.find({
-        $text:{
-          $search:RegExp(req.query["firstName"], "i")
+        $text: {
+          $search: RegExp(req.query["firstName"], "i")
         }
       });
 
       console.log(searchData);
-      
+
       const data = [];
       for (let i = 0; i < searchData.length; i++) {
         const temp = {
@@ -369,15 +452,26 @@ router.get("/pendingTransactions", authenticateJWT, async (req, res) => {
     if (req.user) {
       const page = parseInt(req.query.page) || 1; //for next page pass 1 here
       const limit = parseInt(req.query.limit) || 10;
-      const getTransactionDetails = await Transactiondetails.find({
-        transactionStatus:"Pending"
-      })
-        .limit(limit * 1)
-        .skip((page - 1) * limit)
-        .sort([["transactionDate", -1]])
-        .exec();
+
+      let getTransactionDetails = null;
+
+      if (req.query.page) {
+        getTransactionDetails = await Transactiondetails.find({
+          transactionStatus: "Pending"
+        })
+          .limit(limit * 1)
+          .skip((page - 1) * limit)
+          .sort([["transactionDate", -1]])
+          .exec();
+      } else {
+        getTransactionDetails = await Transactiondetails.find({
+          transactionStatus: "Pending"
+        })
+      }
+
+
       const count = await Transactiondetails.count({
-        transactionStatus:"Pending"
+        transactionStatus: "Pending"
       });
       const newData = {
         transactionData: getTransactionDetails,
@@ -404,15 +498,25 @@ router.get("/completedTransactions", authenticateJWT, async (req, res) => {
     if (req.user) {
       const page = parseInt(req.query.page) || 1; //for next page pass 1 here
       const limit = parseInt(req.query.limit) || 10;
-      const getTransactionDetails = await Transactiondetails.find({
-        transactionStatus:"Completed"
-      })
-        .limit(limit * 1)
-        .skip((page - 1) * limit)
-        .sort([["transactionDate", -1]])
-        .exec();
+
+      let getTransactionDetails = null;
+
+      if (req.query.page) {
+        getTransactionDetails = await Transactiondetails.find({
+          transactionStatus: "Completed"
+        })
+          .limit(limit * 1)
+          .skip((page - 1) * limit)
+          .sort([["transactionDate", -1]])
+          .exec();
+      } else {
+        getTransactionDetails = await Transactiondetails.find({
+          transactionStatus: "Completed"
+        })
+      }
+
       const count = await Transactiondetails.count({
-        transactionStatus:"Completed"
+        transactionStatus: "Completed"
       });
       const newData = {
         transactionData: getTransactionDetails,

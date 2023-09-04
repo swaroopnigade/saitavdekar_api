@@ -168,9 +168,9 @@ router.put(
             res.sendStatus(500);
             return false;
           } else if (
-            new Date(getReqData.dateOfBirth) >
+            new Date(getReqData.dateOfBirth.split("-").reverse().join("-")) >
               new Date(getReqEditData.dateOfBirth) ||
-            new Date(getReqData.dateOfBirth) <
+            new Date(getReqData.dateOfBirth.split("-").reverse().join("-")) <
               new Date(getReqEditData.dateOfBirth)
           ) {
             res.sendStatus(500);
