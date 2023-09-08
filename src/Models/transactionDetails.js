@@ -24,8 +24,7 @@ const transactionDetailsSchema = new mongoose.Schema({
     email:{
         type:String,
         min:4,
-        max:255,
-        required:true
+        max:255
     },
     mobileNo:{
         type:Number,

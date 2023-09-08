@@ -81,6 +81,7 @@ router.post("/", authenticateJWT, upload.array("file", 4), async (req, res) => {
           if (getSaveDetails) {
             const historyData = new TransactiondetailsHistory({
               ...saveData,
+              invoiceId:getSaveDetails.invoiceId,
               transactionId: getSaveDetails._id.toString(),
             });
             await historyData.save();
@@ -151,6 +152,7 @@ router.put(
         const getReqEditData = await Transactiondetails.findOne({
           _id: getReqData._id,
         });
+       
         if(getReqEditData.transactionStatus === "Pending"){
           if (getReqData._id !== getReqEditData._id.toString()) {
             res.sendStatus(500);
@@ -165,14 +167,6 @@ router.put(
             res.sendStatus(500);
             return false;
           } else if (getReqData.mobileNo !== getReqEditData.mobileNo) {
-            res.sendStatus(500);
-            return false;
-          } else if (
-            new Date(getReqData.dateOfBirth.split("-").reverse().join("-")) >
-              new Date(getReqEditData.dateOfBirth) ||
-            new Date(getReqData.dateOfBirth.split("-").reverse().join("-")) <
-              new Date(getReqEditData.dateOfBirth)
-          ) {
             res.sendStatus(500);
             return false;
           } else if (getReqData.address !== getReqEditData.address) {
@@ -210,6 +204,7 @@ router.put(
                   amountPending: getReqData.amountPending,
                   amountGivenDate: getReqData.amountGivenDate,
                   amountPaid:getReqData.amountPaid,
+                  transactionDate:new Date(),
                   totalAmountPaid:parseInt(getReqData.amountPaid) + parseInt(getReqEditData.totalAmountPaid),
                   amountPending:parseInt(getReqEditData.amount) - (parseInt(getReqData.amountPaid) + parseInt(getReqEditData.totalAmountPaid)),
                   transactionStatus:
@@ -226,6 +221,7 @@ router.put(
               if (doc) {
                 delete getReqData._id;
                 delete getReqData.transactionDate;
+                getReqData.dateOfBirth = new Date(getReqData.dateOfBirth.split("-").reverse().join("-"))
                 getReqData.amountPaid = doc.amountPaid;
                 getReqData.totalAmountPaid = doc.totalAmountPaid;
                 getReqData.amountPending = doc.amountPending;

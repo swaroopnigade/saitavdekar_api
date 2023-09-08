@@ -5,6 +5,11 @@ const transactionDetailsHistorySchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    invoiceId:{
+        type:String,
+        required:true,
+        index: { unique: true },
+    },
     firstName:{
         type:String,
         min:4,
@@ -20,8 +25,7 @@ const transactionDetailsHistorySchema = new mongoose.Schema({
     email:{
         type:String,
         min:4,
-        max:255,
-        required:true
+        max:255
     },
     mobileNo:{
         type:Number,
@@ -35,7 +39,19 @@ const transactionDetailsHistorySchema = new mongoose.Schema({
         type : String, 
         required:true
     },
+    metalType:{
+        type:String,
+        required:true,
+    },
     product:{
+        type:String,
+        required:true,
+    },
+    productWeight:{
+        type:Number,
+        required:true,
+    },
+    weightUnit:{
         type:String,
         required:true,
     },
