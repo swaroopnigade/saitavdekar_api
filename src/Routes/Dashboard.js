@@ -13,11 +13,24 @@ router.get("/pieChart", authenticateJWT, async (req, res) => {
       const completedTransactions = await Transactiondetails.find({
         transactionStatus: "Completed",
       }).count();
-      const data = [
-        ["Transactions", "Transaction Count"],
-        ["Pending", peningTransactions],
-        ["Completed", completedTransactions],
-      ];
+      const data = {
+        labels: ["Pending Transactions", "Completed Transactions"],
+        datasets: [
+          {
+            label: '',
+            data: [peningTransactions, completedTransactions],
+            backgroundColor: [
+              "#dc3545",
+              "#198754"
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)'
+            ],
+            borderWidth: 1,
+          },
+        ],
+      }
       res.send({ message: "", data: data, status: 200, error: false });
     } else {
       res.send({
@@ -36,7 +49,7 @@ router.get("/pieChart", authenticateJWT, async (req, res) => {
 router.get("/barChart", authenticateJWT, async (req, res) => {
   try {
     if (req.user) {
-      const months = [
+      const labels = [
         "Jan",
         "Feb",
         "Mar",
@@ -52,7 +65,29 @@ router.get("/barChart", authenticateJWT, async (req, res) => {
       ];
       const date = new Date();
       const bardata = [["Year", "Total", "Completed", "Pending"]];
-      for (let i = 0; i < months.length; i++) {
+
+      const data = {
+        labels,
+        datasets: [
+          {
+            label: "Total",
+            data: [],
+            backgroundColor: "#0d6efd"
+          },
+          {
+            label: "Completed",
+            data: [],
+            backgroundColor: "#198754"
+          },
+          {
+            label: "Pending",
+            data: [],
+            backgroundColor: "#dc3545"
+          }
+        ]
+      };
+
+      for (let i = 0; i < labels.length; i++) {
         const firstDay = new Date(date.getFullYear(), i, 1);
         const lastDay = new Date(date.getFullYear(), i + 1, 0);
         const match_stage = {
@@ -75,41 +110,43 @@ router.get("/barChart", authenticateJWT, async (req, res) => {
         const posts = await Transactiondetails.aggregate(pipeline);
 
         if (posts.length === 0) {
-          bardata.push([months[i], 0, 0, 0]);
+          data.datasets[0].data.push(0);
+          data.datasets[1].data.push(0);
+          data.datasets[2].data.push(0);
         } else if (posts.length === 1) {
-            const makeData = [];
+          const makeData = [];
           const group1 = posts[0];
-          makeData.push(months[i], group1?.count || 0);
+          data.datasets[0].data.push(group1?.count || 0);
           if (group1?._id === "Completed") {
-            makeData[2] = group1.count || 0;
-            makeData[3] = 0;
+            data.datasets[1].data.push(group1.count || 0);
+            data.datasets[2].data.push(0);
           }
           if (group1?._id === "Pending") {
-            makeData[2] = 0;
-            makeData[3] = group1.count || 0;
+            data.datasets[1].data.push(0);
+            data.datasets[2].data.push(group1.count || 0);
           }
           bardata.push(makeData);
         } else {
           const makeData = [];
           const group1 = posts[0];
           const group2 = posts[1];
-          makeData.push(months[i], group1?.count + group2?.count );
+          data.datasets[0].data.push(group1?.count + group2?.count);
           if (group1?._id === "Completed") {
-            makeData[2] = group1.count || 0;
+            data.datasets[1].data.push(group1.count || 0);
           }
           if (group2?._id === "Completed") {
-            makeData[2] = group2.count || 0;
+            data.datasets[1].data.push(group2.count || 0);
           }
           if (group1?._id === "Pending") {
-            makeData[3] = group1.count || 0;
+            data.datasets[2].data.push(group1.count || 0);
           }
           if (group2?._id === "Pending") {
-            makeData[3] = group2.count || 0;
+            data.datasets[2].data.push(group2.count || 0);
           }
           bardata.push(makeData);
         }
       }
-      res.send({ message: "", data: bardata, status: 200, error: false });
+      res.send({ message: "", data: data, status: 200, error: false });
     } else {
       res.send({
         message: "You are not va    lid user",
@@ -155,7 +192,7 @@ router.get("/cardCounts", authenticateJWT, async (req, res) => {
           }
           if (transactiondetails[i]._id === "Pending") {
             tempData.pending = transactiondetails[i].count || 0;
-            
+
           }
           setCount = setCount + transactiondetails[i].count
         }
